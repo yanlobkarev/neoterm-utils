@@ -4,11 +4,10 @@ endif
 
 let g:neoterm_utils_loaded = 1
 
-
 let g:neoterm_last_toggled_num = -1
 let g:neoterm_last_focused_buf = {} " tab-to-buf map
-let g:neoterm_batch_size = 4        " default terms batch len
-let g:neoterm_batch_at_startup = 1  " creates terms batch at vim startup
+"let g:neoterm_batch_at_startup = 1  " creates terms batch at vim startup
+"let g:neoterm_batch_size = 4        " default terms batch len
 
 
 function! s:memCurrentBufferHandle()
@@ -166,7 +165,8 @@ endfunction
 
 
 function! s:tnewbatch(...)
-    let l:count = a:0 ? a:1 : g:neoterm_batch_size
+    let l:default = get(g:, 'neoterm_batch_size', 4)
+    let l:count = a:0 ? a:1 : l:default
     while l:count > 0
         let l:count -= 1
         call <SID>tnew(0)
@@ -191,7 +191,7 @@ function! s:initNeotermUtils()
     endif
 
     let g:neoterm_utils_loaded = 1
-    if g:neoterm_batch_at_startup
+    if get(g:, 'neoterm_batch_at_startup', 1)
         call <SID>tnewbatch(g:neoterm_batch_size)
     endif
 endfunction
