@@ -174,6 +174,7 @@ function! s:tnewbatch(...)
 endfunction
 
 
+command! TtoggleLast :call TUtoggleLast()
 command! -nargs=? TnewBatch :call <SID>tnewbatch(<args>)
 command! -bar -complete=shellcmd TnewImproved silent call <SID>tnew(1)
 cabbrev Tnew TnewImproved
