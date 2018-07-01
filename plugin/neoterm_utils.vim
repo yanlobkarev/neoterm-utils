@@ -70,7 +70,7 @@ function! TUtoggleLast()
 endfunction
 
 
-function! s:opennum(num)
+function! TUopenNum(num)
     if !has_key(g:neoterm.instances, a:num)
         echo "There is no terminal".a:num
         return -1
