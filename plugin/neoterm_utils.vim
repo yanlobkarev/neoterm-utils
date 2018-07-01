@@ -200,7 +200,7 @@ function! s:initNeotermUtils()
     endif
 
     let g:neoterm_utils_loaded = 1
-    if get(g:, 'neoterm_batch_at_startup', 1)
+    if g:neoterm_batch_at_startup
         call <SID>tnewbatch(g:neoterm_batch_size)
     endif
 endfunction

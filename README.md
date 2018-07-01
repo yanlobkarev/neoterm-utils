@@ -29,10 +29,18 @@ imap <silent> <M-`> <esc>:TtoggleLast<cr>
 nnoremap <silent><localleader>nt :TnewImproved<CR>
 
 let g:neoterm_batch_size = 4        "  Customize terms batch size
-let g:neoterm_batch_at_startup = 0  "  Disable auto cration of neoterm 
-                                    " batch at startup (for manual 
-                                    " creation use :TnewBatch and
-                                    " :TnewImproved)
+let g:neoterm_batch_at_startup = 0  "  Disable auto creation of 
+                                    " neoterm batch at startup (for 
+                                    " manual creation use :TnewBatch 
+                                    " or :TnewImproved)
+
+" Predefined commands:
+let g:neoterm_predefined_coms = {
+\    1: './manage.py runserver',
+\    2: './manage.py shell_plus',
+\    3: 'gulp watch',
+\    4: 'redis-server',
+\}
 ```
 
 ...docs in progress
