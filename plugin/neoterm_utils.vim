@@ -5,9 +5,12 @@ endif
 let g:neoterm_utils_loaded = 1
 
 let g:neoterm_last_toggled_num = -1
-let g:neoterm_last_focused_buf = {} " tab-to-buf map
-"let g:neoterm_batch_at_startup = 1  " creates terms batch at vim startup
-"let g:neoterm_batch_size = 4        " default terms batch len
+let g:neoterm_last_focused_buf = {}                                      " tab-to-buf map
+
+" Customizeable
+let g:neoterm_batch_size = get(g:, 'neoterm_batch_size', 4)        		 " default terms batch len
+let g:neoterm_predefined_coms = get(g:, 'neoterm_predefined_coms', {})   " predefined commands for neoterm startups
+let g:neoterm_batch_at_startup = get(g:, 'neoterm_batch_at_startup', 1)  " creates terms batch at vim startup
 
 
 function! s:memCurrentBufferHandle()
@@ -154,6 +157,13 @@ function! s:tnew(full)
     execute "tmap <silent> <M-" . l:i . "> <esc>:call TUtoggleNum(" . l:i . ")<cr>"
     execute "vmap <silent> <M-" . l:i . "> <esc>:call TUtoggleNum(" . l:i . ")<cr>"
 
+    " Type-in predefined command
+    if has_key(g:neoterm_predefined_coms, l:i)
+        let l:predefined_com = g:neoterm_predefined_coms[l:i]
+        call l:instance.clear()
+        call l:instance.exec(l:predefined_com)
+    endif
+
     if a:full
         let g:neoterm_last_toggled_num = l:instance.id
         call <SID>tpyactivate(l:instance)
@@ -165,8 +175,7 @@ endfunction
 
 
 function! s:tnewbatch(...)
-    let l:default = get(g:, 'neoterm_batch_size', 4)
-    let l:count = a:0 ? a:1 : l:default
+    let l:count = a:0 ? a:1 : g:neoterm_batch_size
     while l:count > 0
         let l:count -= 1
         call <SID>tnew(0)
