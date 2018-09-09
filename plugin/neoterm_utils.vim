@@ -50,7 +50,7 @@ function! s:closeall_terminals()
         if bufwinnr(l:ins.buffer_id) > 0
             call <SID>jumpToMemBuffer()
             let g:neoterm_last_toggled_num = l:num
-            call l:ins.close()
+            call g:neoterm#close({ 'target': l:ins.id })
         endif
     endfor
 endfunction
@@ -61,10 +61,10 @@ function! TUtoggleLast()
         let l:instance = g:neoterm.instances[g:neoterm_last_toggled_num]
         if bufwinnr(l:instance.buffer_id) > 0
             call <SID>jumpToMemBuffer()
-            call l:instance.close()
+            call g:neoterm#close({ 'target': l:instance.id })
         else
             call <SID>memCurrentBufferHandle()
-            call l:instance.open()
+            call g:neoterm#open({ 'target': l:instance.id })
             call <SID>tfocus(l:instance)
         endif
     else
@@ -86,7 +86,7 @@ function! TUopenNum(num)
         " closee all other buffers
         call <SID>closeall_terminals()
         " and open selected one
-        call l:instance.open()
+        call g:neoterm#open({ 'target': l:instance.id })
     endif
 
     let g:neoterm_last_toggled_num = a:num
@@ -105,14 +105,14 @@ function! TUtoggleNum(num)
     let l:instance = g:neoterm.instances[a:num]
     if bufwinnr(l:instance.buffer_id) > 0
         call <SID>jumpToMemBuffer()
-        call l:instance.close()
+        call g:neoterm#close({ 'target': l:instance.id })
     else
 
         call <SID>memCurrentBufferHandle()
         " closee all other buffers
         call <SID>closeall_terminals()
         " and open selected one
-        call l:instance.open()
+        call g:neoterm#open({ 'target': l:instance.id })
         call <SID>tfocus(l:instance)
     endif
 
@@ -127,15 +127,15 @@ function! s:tpyactivate(instance)
     if len(l:env)
         echom 'ENV:' l:env 
         let l:com = 'source ' . l:env . '/bin/activate'
-        call instance.do(l:com)
-        call instance.clear()
+        call g:neoterm#do({ 'target': instance.id, 'cmd': l:com })
+        call g:neoterm#clear({ 'target': instance.id })
     elseif !len(l:env)
         let l:env = $CONDA_DEFAULT_ENV
         if len(l:env)
             echom 'ENV:' l:env 
             let l:com = 'source activate ' . l:env 
-            call instance.do(l:com)
-            call instance.clear()
+            call g:neoterm#do({ 'target': instance.id, 'cmd': l:com })
+            call g:neoterm#clear({ 'target': instance.id })
         endif
     endif
 endfunction
@@ -147,8 +147,7 @@ function! s:tnew(full)
         call <SID>closeall_terminals()
     endif
 
-    call g:neoterm#tnew()
-    let l:instance = g:neoterm.last()
+    let l:instance = g:neoterm#new()
     call l:instance.vim_exec("tnoremap \<buffer\> \<esc\> \<C-\\>\<C-n\>")
 
     let l:i = l:instance.id
@@ -160,8 +159,8 @@ function! s:tnew(full)
     " Type-in predefined command
     if has_key(g:neoterm_predefined_coms, l:i)
         let l:predefined_com = g:neoterm_predefined_coms[l:i]
-        call l:instance.clear()
-        call l:instance.exec(l:predefined_com)
+        call g:neoterm#clear({ 'target': l:instance.id })
+        call g:neoterm#exec({ 'target': l:instance.id, 'cmd': [l:predefined_com] })
     endif
 
     if a:full
@@ -169,7 +168,7 @@ function! s:tnew(full)
         call <SID>tpyactivate(l:instance)
         call <SID>tfocus(l:instance)
     else
-        call l:instance.close()
+        call g:neoterm#close({'target': l:i})
     endif
 endfunction
 
