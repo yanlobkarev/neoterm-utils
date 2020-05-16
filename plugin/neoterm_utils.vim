@@ -28,7 +28,7 @@ endfunction
 
 function! s:jumpToMemBuffer()
     let l:tab = tabpagenr()
-    let l:win = g:neoterm_last_focused_buf[l:tab]
+    let l:win = get(g:neoterm_last_focused_buf, l:tab)
     call win_gotoid(l:win)
 endfunction
 
@@ -150,6 +150,10 @@ function! s:tnew(full)
     let l:instance = g:neoterm#new()
     call l:instance.vim_exec("tnoremap \<buffer\> \<esc\> \<C-\\>\<C-n\>")
 
+    if get(g:, 'neoterm_default_mod', '') == 'botright'
+        call l:instance.vim_exec("nmap \<up\> \<C-W\>\<C-P\>") |  " In case buffer at bottiom
+    endif
+
     let l:i = l:instance.id
     execute "nmap <silent> <M-" . l:i . "> :call TUtoggleNum(" . l:i . ")<cr>"
     execute "imap <silent> <M-" . l:i . "> <esc>:call TUtoggleNum(" . l:i . ")<cr>"
@@ -173,6 +177,48 @@ function! s:tnew(full)
 endfunction
 
 
+function! s:tnewcmd(...)
+    let l:cmd = join(a:000)
+    let l:mem_win = winnr()
+    call <SID>closeall_terminals()
+
+    let l:instance = {}
+
+    if has_key(g:neoterm_utils_cmds, l:cmd) 
+        let l:i = g:neoterm_utils_cmds[l:cmd]
+        if has_key(g:neoterm.instances, l:i)
+            let l:instance = g:neoterm.instances[l:i]
+            call g:neoterm#open({ 'target': l:instance.id })
+        endif
+    endif
+
+    if empty(l:instance)
+        " Init instance
+        let l:instance = g:neoterm#new()
+        call l:instance.vim_exec("tnoremap \<buffer\> \<esc\> \<C-\\>\<C-n\>")
+        let l:i = l:instance.id
+        call g:neoterm#clear({ 'target': l:i })
+        call g:neoterm#do({ 'target': l:i, 'cmd': l:cmd })
+
+        " Register
+        let g:neoterm_utils_cmds[l:cmd] = l:instance.id
+    endif
+
+    let g:neoterm_last_toggled_num = l:instance.id
+    "call <SID>tpyactivate(l:instance)   " TODO: or remove?
+    "switch to and back other buffers
+    
+    " NOTE: coping with https://github.com/junegunn/fzf.vim/issues/21
+    
+    call <SID>tfocus(l:instance)
+    "call win_gotoid(win_getid(l:mem_win))
+    "startinsert
+    "call <SID>tfocus(l:instance)
+    "echom "final:"
+    "echom winnr()
+endfunction
+
+
 function! s:tnewbatch(...)
     let l:count = a:0 ? a:1 : g:neoterm_batch_size
     while l:count > 0
@@ -185,9 +231,11 @@ endfunction
 command! TtoggleLast :call TUtoggleLast()
 command! -nargs=? TnewBatch :call <SID>tnewbatch(<args>)
 command! -bar -complete=shellcmd TnewImproved silent call <SID>tnew(1)
+command! -nargs=+ TRun :call <SID>tnewcmd(<f-args>)
 cabbrev Tnew TnewImproved
 
 let g:neoterm_utils_loaded = 0
+let g:neoterm_utils_cmds = {}
 
 function! s:initNeotermUtils()
     if g:neoterm_utils_loaded == 1
